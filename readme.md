@@ -5,6 +5,7 @@ A node red node that returns German DWD MOSMIX current / forecasted weather for 
 __This node is only useful if you are interested in weather data for Germany.__
 
 The weather data is provided by DWD (Deutscher Wetterdienst, Frankfurter Straße 135, 63067 Offenbach)
+
 See: https://isabel.dwd.de/DE/leistungen/opendata/opendata.html
 
 #### `msg` Attribute
