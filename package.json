@@ -1,0 +1,22 @@
+{
+  "name": "node-red-contrib-dwd-local-weather",
+  "version": "0.1.0",
+  "description": "Node Red node to retrieve local weather forecast from DWD (Germany)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Christian Stein",
+  "license": "Apache 2.0",
+  "keywords": [ "node-red", "weather", "dwd", "mosmix", "forecast", "Wetter", "Vorhersage" ],
+  "dependencies": {
+    "request": "^2.88.0",
+    "sax": "^1.2.4",
+    "unzipper": "^0.9.11"
+  },
+  "node-red": {
+    "nodes": {
+      "dwdweather": "dwdweather.js"
+    }
+  }
+}

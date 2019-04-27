@@ -1,0 +1,24 @@
+{
+	"dwdweather": {
+		"label": {
+			"name": "Name",
+			"repeat": "Repeat",
+			"mosmixStation": "MOSMIX Station",
+			"lookAheadHours": "Look ahead hours"
+		},
+		"description": {
+			"mosmixStation": "MOSMIX Station number. See: ",
+			"mosmixStationLinkText": "here",
+			"lookAheadHours": "Hours to look ahead into the future. Use 0 to get current weather."
+		},
+		"status": {
+			"requesting": "Requesting latest MOSMIX data file"
+		},
+		"warn": {
+			"nopredictions": "no predictions for any future dates found - likely the file is too old",
+			"noattribute": "MOSMIX attribute __attribute__ not known or not processed",
+			"requestFailed": "MOSMIX request failed: __error__",
+			"noDataForStation": "MOSMIX returned no data (404). Please check whether the station number is correct."
+		}
+	}
+}
