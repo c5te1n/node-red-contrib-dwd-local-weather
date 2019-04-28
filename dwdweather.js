@@ -11,7 +11,8 @@ module.exports = function(RED) {
     initWeatherForecast();
     var nextWeatherUpdate = 0;
     
-    var mosmixElements = ['TTT', 'Td', 'FF', 'DD']; // MOSMIX elements to process;
+    const mosmixElementsBase = ['TTT', 'Td', 'FF', 'DD', 'wwP'];
+    var mosmixElements = mosmixElementsBase // MOSMIX elements to process;
 
     function initWeatherForecast() {
         weatherForecast = {
@@ -21,7 +22,6 @@ module.exports = function(RED) {
 
     function updateWeatherForecastIfOutdated(node) {
         if ((new Date).getTime() > nextWeatherUpdate) {
-            nextWeatherUpdate = (new Date).getTime() + 600 * 1000; // retry in 10 minutes in case of a failure
             return updateWeatherForecast(node);
         } else {
             return Promise.resolve();
@@ -29,6 +29,8 @@ module.exports = function(RED) {
     }
 
     function updateWeatherForecast(node) {
+        nextWeatherUpdate = (new Date).getTime() + 600 * 1000; // retry in 10 minutes in case of a failure
+
         var isInitialized = false;
         var xmlTagStack = [];
         var xmlStreamParser = sax.createStream(true, {
@@ -136,29 +138,43 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,config);
         var node = this;
 
-        this.repeat = config.repeat || 0;
-        this.mosmixStation = config.mosmixStation;
-        this.lookAhead = config.lookAheadHours * 3600000;
+        node.repeat = config.repeat || 0;
+        node.mosmixStation = config.mosmixStation;
+        node.lookAhead = config.lookAheadHours * 3600000;
+        node.additionalFields = config.additionalFields.split(",").map(v=>v.trim()).filter(v=>(v!=""));
+        // mosmixElements = mosmixElementsBase; => removing this as it will lead to problems with multiple nodes with different additional field configs
+        node.additionalFields.forEach(v => {
+            if (!mosmixElements.includes(v)) {
+                mosmixElements.push(v);
+            };
+        });
 
-        this.interval_id = null;
-        if (this.repeat > 0) {
-            this.intervalId = setInterval(function() {
+        node.interval_id = null;
+        if (node.repeat > 0) {
+            node.intervalId = setInterval(function() {
                 node.emit("input",{});
-            }, this.repeat * 1000);
+            }, node.repeat * 1000);
         }
 
         node.on('input', function(msg) {
             updateWeatherForecastIfOutdated(node)
             .then(() => {
                 var forecastDate = new Date();
-                forecastDate.setTime(forecastDate.getTime() + this.lookAhead);
+                forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
                 try {
                     msg.payload = {
                         "tempc": getForecastedTemperature(forecastDate),
                         "humidity": getForecastedHumidity(forecastDate),
                         "windspeed": Math.round(getInterpolatedValue("FF", forecastDate) * 10) / 10,
                         "winddirection": Math.round(getInterpolatedValue("DD", forecastDate) * 10) / 10,
+                        "precipitation%": Math.round(getInterpolatedValue("wwP", forecastDate) * 10) / 10,
                     };
+                    node.additionalFields.forEach(field => {
+                        var val = getInterpolatedValue(field, forecastDate);
+                        if (val) {
+                            msg.payload[field] = Math.round(val * 100) / 100;
+                        };
+                    });
                     node.send(msg);
                 } catch (err) {
                     node.warn(err.message);
@@ -175,9 +191,13 @@ module.exports = function(RED) {
 
         node.on("close", function() {
             if (node.intervalId !== null) {
-                clearInterval(this.intervalId);
+                clearInterval(node.intervalId);
             }
+            nextWeatherUpdate = 0;
+            initWeatherForecast();
         });
+
+        node.emit("input",{});
     }
 
     RED.nodes.registerType("dwdweather",DwdWeatherQueryNode);

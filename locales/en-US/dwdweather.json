@@ -4,12 +4,15 @@
 			"name": "Name",
 			"repeat": "Repeat",
 			"mosmixStation": "MOSMIX Station",
-			"lookAheadHours": "Look ahead hours"
+			"lookAheadHours": "Look ahead hours",
+			"additionalFields": "Additional fields"
 		},
 		"description": {
 			"mosmixStation": "MOSMIX Station number. See: ",
 			"mosmixStationLinkText": "here",
-			"lookAheadHours": "Hours to look ahead into the future. Use 0 to get current weather."
+			"lookAheadHours": "Hours to look ahead into the future. Use 0 to get current weather.",
+			"additionalFields": "Comma separated list of additional element short names to parse and return from MOSMIX (case sensitive). See: ",
+			"mosmixStationLinkText": "here"
 		},
 		"status": {
 			"requesting": "Requesting latest MOSMIX data file"
