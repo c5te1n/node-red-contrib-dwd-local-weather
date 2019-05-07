@@ -10,10 +10,12 @@ See: https://isabel.dwd.de/DE/leistungen/opendata/opendata.html
 
 #### `msg` Attribute
 
+* `payload.station` - Description (location) of the station
 * `payload.tempc` - Temperature in °C
 * `payload.humidity` -  Relative humidity
 * `payload.windspeed` - Windspeed in m/s
 * `payload.winddirection` - Winddirection in °
+* `payload.precipitation%` - probability of rain in per cent (so a value of 4 means 4%)
 
 ## License
 

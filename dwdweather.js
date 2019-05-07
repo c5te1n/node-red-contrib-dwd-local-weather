@@ -7,21 +7,23 @@ module.exports = function(RED) {
     const MOSMIX_URL = 'https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{$station}/kml/MOSMIX_L_LATEST_{$station}.kmz';
     const MOSMIX_MAXAGE = 3600 * 1000;
 
-    var weatherForecast;
+    var weatherForecast = {}; // main data structure to hold weather forecast. See initWeatherForecast()
     initWeatherForecast();
-    var nextWeatherUpdate = 0;
+    var nextWeatherUpdate = {}; // Hash: mosmixStation: next update due in unix timestamp ms
     
     const mosmixElementsBase = ['TTT', 'Td', 'FF', 'DD', 'wwP'];
-    var mosmixElements = mosmixElementsBase // MOSMIX elements to process;
+    var mosmixElements = {};  // Hash: mosmixStation: Array with MOSMIX elements to process;
 
-    function initWeatherForecast() {
-        weatherForecast = {
-            "times": [],
+    function initWeatherForecast(mosmixStation) {
+        weatherForecast[mosmixStation] = {
+            "description": "",
+            "times": []
+            // followed by additional fields like 'TTT': Array of forecast values
         };
     }
 
     function updateWeatherForecastIfOutdated(node) {
-        if ((new Date).getTime() > nextWeatherUpdate) {
+        if (!nextWeatherUpdate[node.mosmixStation] || (new Date).getTime() > nextWeatherUpdate[node.mosmixStation]) {
             return updateWeatherForecast(node);
         } else {
             return Promise.resolve();
@@ -29,38 +31,41 @@ module.exports = function(RED) {
     }
 
     function updateWeatherForecast(node) {
-        nextWeatherUpdate = (new Date).getTime() + 600 * 1000; // retry in 10 minutes in case of a failure
+        nextWeatherUpdate[node.mosmixStation] = (new Date).getTime() + 600 * 1000; // retry in 10 minutes in case of a failure
 
-        var isInitialized = false;
-        var xmlTagStack = [];
-        var xmlStreamParser = sax.createStream(true, {
+        let isInitialized = false;
+        let xmlTagStack = [];
+        let xmlStreamParser = sax.createStream(true, {
             'trim': true
         });
 
-        xmlStreamParser.onopentag = (node) => {
+        xmlStreamParser.onopentag = (tag) => {
             if (!isInitialized) {
                 // seems we are getting data => initialize data structures
-                initWeatherForecast();
-                nextWeatherUpdate = (new Date).getTime() + MOSMIX_MAXAGE;
+                initWeatherForecast(node.mosmixStation);
+                nextWeatherUpdate[node.mosmixStation] = (new Date).getTime() + MOSMIX_MAXAGE;
                 isInitialized = true;
             }
-            if (!node.isSelfClosing) {
-                xmlTagStack.push(node);
+            if (!tag.isSelfClosing) {
+                xmlTagStack.push(tag);
             }
         };
-        xmlStreamParser.onclosetag = (node) => {
+        xmlStreamParser.onclosetag = (tag) => {
             xmlTagStack.pop();
         };
         xmlStreamParser.ontext = (text) => {
             if (xmlTagStack.length) {
                 var currentTag = xmlTagStack[xmlTagStack.length - 1];
+                if (currentTag.name=="kml:description") {
+                    weatherForecast[node.mosmixStation]["description"] = text;
+                }
                 if (currentTag.name=="dwd:TimeStep") {
-                    weatherForecast["times"].push(new Date(text));
+                    weatherForecast[node.mosmixStation]["times"].push(new Date(text));
                 }
                 if (xmlTagStack.length >= 2 && currentTag.name=="dwd:value") {
                     var enclosingTag = xmlTagStack[xmlTagStack.length - 2];
-                    if (enclosingTag.name=="dwd:Forecast" && enclosingTag.attributes["dwd:elementName"] && mosmixElements.includes(enclosingTag.attributes["dwd:elementName"])) {
-                        weatherForecast[enclosingTag.attributes["dwd:elementName"]] = text.split(/\s+/).map(v => Number.parseFloat(v));
+                    if (enclosingTag.name=="dwd:Forecast" && enclosingTag.attributes["dwd:elementName"] && mosmixElements[node.mosmixStation].includes(enclosingTag.attributes["dwd:elementName"])) {
+                        weatherForecast[node.mosmixStation][enclosingTag.attributes["dwd:elementName"]] = text.split(/\s+/).map(v => Number.parseFloat(v));
                     }
                 }
             }
@@ -88,14 +93,17 @@ module.exports = function(RED) {
         });
     }
 
-    function getInterpolatedValue(attribute, forecastDate = null) {
+    function getInterpolatedValue(mosmixStation, attribute, forecastDate = null) {
         if (forecastDate===null) {
             forecastDate = new Date();
         }
-        var idx = weatherForecast["times"].findIndex((myDate) => {
+        if (!weatherForecast[mosmixStation]) {
+            throw new Error(RED._("dwdweather.warn.noDataForStation"));
+        }
+        var idx = weatherForecast[mosmixStation]["times"].findIndex((myDate) => {
             return (myDate > forecastDate);
         });
-        if (!weatherForecast[attribute]) {
+        if (!weatherForecast[mosmixStation][attribute]) {
             // attribute has not been parsed
             throw new Error(RED._("dwdweather.warn.noattribute", { attribute }));
         };
@@ -104,25 +112,25 @@ module.exports = function(RED) {
             throw new Error(RED._("dwdweather.warn.nopredictions"));
         } else if (idx==0) {
             // all predictions in file are for the future => return first one
-            return weatherForecast[attribute][0];
+            return weatherForecast[mosmixStation][attribute][0];
         } else {
             // linear interpolation of current temperature
-            var share = (forecastDate.getTime() - weatherForecast.times[idx-1].getTime()) / (weatherForecast.times[idx].getTime() - weatherForecast.times[idx-1].getTime());
-            return weatherForecast[attribute][idx-1] + share * (weatherForecast[attribute][idx] - weatherForecast[attribute][idx-1]);
+            var share = (forecastDate.getTime() - weatherForecast[mosmixStation].times[idx-1].getTime()) / (weatherForecast[mosmixStation].times[idx].getTime() - weatherForecast[mosmixStation].times[idx-1].getTime());
+            return weatherForecast[mosmixStation][attribute][idx-1] + share * (weatherForecast[mosmixStation][attribute][idx] - weatherForecast[mosmixStation][attribute][idx-1]);
         }
     }
 
-    function getForecastedTemperature(forecastDate) {
-        return Math.round(getTempCelsius(getInterpolatedValue("TTT", forecastDate)) * 10) / 10;
+    function getForecastedTemperature(mosmixStation, forecastDate) {
+        return Math.round(getTempCelsius(getInterpolatedValue(mosmixStation, "TTT", forecastDate)) * 10) / 10;
     }
 
     function getTempCelsius(tempK) {
         return tempK - 273.15;
     }
 
-    function getForecastedHumidity(forecastDate) {
+    function getForecastedHumidity(mosmixStation, forecastDate) {
         // calculate relative humidity from Taupunkt and temp in Celsius
-        return Math.round(1000 * getSDD(getTempCelsius(getInterpolatedValue("Td", forecastDate))) / getSDD(getTempCelsius(getInterpolatedValue("TTT", forecastDate)))) / 10;
+        return Math.round(1000 * getSDD(getTempCelsius(getInterpolatedValue(mosmixStation, "Td", forecastDate))) / getSDD(getTempCelsius(getInterpolatedValue(mosmixStation, "TTT", forecastDate)))) / 10;
     }
 
     function getSDD(tempC) {
@@ -143,9 +151,12 @@ module.exports = function(RED) {
         node.lookAhead = config.lookAheadHours * 3600000;
         node.additionalFields = config.additionalFields.split(",").map(v=>v.trim()).filter(v=>(v!=""));
         // mosmixElements = mosmixElementsBase; => removing this as it will lead to problems with multiple nodes with different additional field configs
+        if (!mosmixElements[node.mosmixStation]) {
+            mosmixElements[node.mosmixStation] = mosmixElementsBase;
+        }
         node.additionalFields.forEach(v => {
-            if (!mosmixElements.includes(v)) {
-                mosmixElements.push(v);
+            if (!mosmixElements[node.mosmixStation].includes(v)) {
+                mosmixElements[node.mosmixStation].push(v);
             };
         });
 
@@ -163,14 +174,15 @@ module.exports = function(RED) {
                 forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
                 try {
                     msg.payload = {
-                        "tempc": getForecastedTemperature(forecastDate),
-                        "humidity": getForecastedHumidity(forecastDate),
-                        "windspeed": Math.round(getInterpolatedValue("FF", forecastDate) * 10) / 10,
-                        "winddirection": Math.round(getInterpolatedValue("DD", forecastDate) * 10) / 10,
-                        "precipitation%": Math.round(getInterpolatedValue("wwP", forecastDate) * 10) / 10,
+                        "station": weatherForecast[node.mosmixStation].description,
+                        "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),
+                        "humidity": getForecastedHumidity(node.mosmixStation, forecastDate),
+                        "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
+                        "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,
+                        "precipitation%": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
                     };
                     node.additionalFields.forEach(field => {
-                        var val = getInterpolatedValue(field, forecastDate);
+                        var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
                         if (val) {
                             msg.payload[field] = Math.round(val * 100) / 100;
                         };
@@ -193,8 +205,8 @@ module.exports = function(RED) {
             if (node.intervalId !== null) {
                 clearInterval(node.intervalId);
             }
-            nextWeatherUpdate = 0;
-            initWeatherForecast();
+            nextWeatherUpdate[node.mosmixStation] = 0;
+            initWeatherForecast(node.mosmixStation);
         });
 
         node.emit("input",{});
