@@ -146,9 +146,9 @@ module.exports = function(RED) {
         RED.nodes.createNode(this,config);
         var node = this;
 
-        node.repeat = config.repeat || 0;
+        node.repeat = Number(config.repeat) || 0;
         node.mosmixStation = config.mosmixStation;
-        node.lookAhead = config.lookAheadHours * 3600000;
+        node.lookAhead = Number(config.lookAheadHours) * 3600000;
         node.additionalFields = config.additionalFields.split(",").map(v=>v.trim()).filter(v=>(v!=""));
         // mosmixElements = mosmixElementsBase; => removing this as it will lead to problems with multiple nodes with different additional field configs
         if (!mosmixElements[node.mosmixStation]) {
@@ -170,26 +170,28 @@ module.exports = function(RED) {
         node.on('input', function(msg) {
             updateWeatherForecastIfOutdated(node)
             .then(() => {
-                var forecastDate = new Date();
-                forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
-                try {
-                    msg.payload = {
-                        "station": weatherForecast[node.mosmixStation].description,
-                        "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),
-                        "humidity": getForecastedHumidity(node.mosmixStation, forecastDate),
-                        "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
-                        "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,
-                        "precipitation%": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
-                    };
-                    node.additionalFields.forEach(field => {
-                        var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
-                        if (val) {
-                            msg.payload[field] = Math.round(val * 100) / 100;
+                if (weatherForecast[node.mosmixStation]) {
+                    var forecastDate = new Date();
+                    forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
+                    try {
+                        msg.payload = {
+                            "station": weatherForecast[node.mosmixStation].description,
+                            "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),
+                            "humidity": getForecastedHumidity(node.mosmixStation, forecastDate),
+                            "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
+                            "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,
+                            "precipitation%": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
                         };
-                    });
-                    node.send(msg);
-                } catch (err) {
-                    node.warn(err.message);
+                        node.additionalFields.forEach(field => {
+                            var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
+                            if (val!==null) {
+                                msg.payload[field] = Math.round(val * 100) / 100;
+                            };
+                        });
+                        node.send(msg);
+                    } catch (err) {
+                        node.warn(err.message);
+                    }
                 }
             })
             .catch((message) => {
@@ -206,7 +208,8 @@ module.exports = function(RED) {
                 clearInterval(node.intervalId);
             }
             nextWeatherUpdate[node.mosmixStation] = 0;
-            initWeatherForecast(node.mosmixStation);
+            delete weatherForecast[node.mosmixStation];
+            // initWeatherForecast(node.mosmixStation);
         });
 
         node.emit("input",{});
