@@ -11,7 +11,7 @@ module.exports = function(RED) {
     initWeatherForecast();
     var nextWeatherUpdate = {}; // Hash: mosmixStation: next update due in unix timestamp ms
     
-    const mosmixElementsBase = ['TTT', 'Td', 'FF', 'DD', 'wwP'];
+    const mosmixElementsBase = ['TTT', 'Td', 'FF', 'DD', 'wwP', 'RR1c'];
     var mosmixElements = {};  // Hash: mosmixStation: Array with MOSMIX elements to process;
 
     function initWeatherForecast(mosmixStation) {
@@ -120,6 +120,36 @@ module.exports = function(RED) {
         }
     }
 
+    function sumFutureValue(mosmixStation, attribute, hours, forecastDate = null) {
+        if (forecastDate===null) {
+            forecastDate = new Date();
+        }
+        if (!weatherForecast[mosmixStation]) {
+            throw new Error(RED._("dwdweather.warn.noDataForStation"));
+        }
+        var idx = weatherForecast[mosmixStation]["times"].findIndex((myDate) => {
+            return (myDate > forecastDate);
+        });
+        if (!weatherForecast[mosmixStation][attribute]) {
+            // attribute has not been parsed
+            throw new Error(RED._("dwdweather.warn.noattribute", { attribute }));
+        };
+        if (idx==-1) {
+            // no predictions for any future dates found - likely the file is too old
+            throw new Error(RED._("dwdweather.warn.nopredictions"));
+        } else {
+            var sum = 0;
+            // sum x future values (x = hours), but not more than length of array
+            for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours; i++) {
+                if (!isNaN(weatherForecast[mosmixStation][attribute][i])) {
+                    sum = sum + weatherForecast[mosmixStation][attribute][i];
+                }
+            }
+
+            return sum
+        }
+    }
+
     function getForecastedTemperature(mosmixStation, forecastDate) {
         return Math.round(getTempCelsius(getInterpolatedValue(mosmixStation, "TTT", forecastDate)) * 10) / 10;
     }
@@ -181,6 +211,7 @@ module.exports = function(RED) {
                             "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
                             "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,
                             "precipitation%": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
+                            "precipitationNext24h": Math.round(sumFutureValue(node.mosmixStation, "RR1c", 24, forecastDate) * 10) / 10
                         };
                         node.additionalFields.forEach(field => {
                             var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
