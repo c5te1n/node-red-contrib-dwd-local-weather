@@ -9,7 +9,15 @@
   },
   "author": "Christian Stein <dev@center-tag.net>",
   "license": "Apache 2.0",
-  "keywords": [ "node-red", "weather", "dwd", "mosmix", "forecast", "Wetter", "Vorhersage" ],
+  "keywords": [
+    "node-red",
+    "weather",
+    "dwd",
+    "mosmix",
+    "forecast",
+    "Wetter",
+    "Vorhersage"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/c5te1n/node-red-contrib-dwd-local-weather.git"
@@ -17,7 +25,7 @@
   "dependencies": {
     "request": "^2.88.0",
     "sax": "^1.2.4",
-    "unzipper": "^0.9.11"
+    "unzipper": "^0.9.15"
   },
   "node-red": {
     "nodes": {
