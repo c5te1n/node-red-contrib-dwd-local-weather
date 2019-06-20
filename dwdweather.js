@@ -140,13 +140,12 @@ module.exports = function(RED) {
         } else {
             var sum = 0;
             // sum x future values (x = hours), but not more than length of array
-            for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours; i++) {
+            for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours + idx; i++) {
                 if (!isNaN(weatherForecast[mosmixStation][attribute][i])) {
                     sum = sum + weatherForecast[mosmixStation][attribute][i];
                 }
             }
-
-            return sum
+            return sum;
         }
     }
 
