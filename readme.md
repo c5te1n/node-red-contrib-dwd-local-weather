@@ -15,8 +15,10 @@ See: https://isabel.dwd.de/DE/leistungen/opendata/opendata.html
 * `payload.humidity` -  Relative humidity
 * `payload.windspeed` - Windspeed in m/s
 * `payload.winddirection` - Winddirection in °
-* `payload.precipitation%` - probability of rain in per cent (so a value of 4 means 4%)
+* `payload.precipitation_perc` - probability of rain in per cent (so a value of 4 means 4%)
 * `payload.precipitationNext24h` - total precipitation in the next 24 hours in kg/m2
+* `payload.forecast_dt` - epoch timestamp of the forecast
+* `payload.precipitation%` - DEPRECATED, same as `payload.precipitation_perc`
 
 ## License
 

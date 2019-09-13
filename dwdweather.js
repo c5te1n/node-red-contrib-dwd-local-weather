@@ -192,7 +192,9 @@ module.exports = function(RED) {
         node.interval_id = null;
         if (node.repeat > 0) {
             node.intervalId = setInterval(function() {
-                node.emit("input",{});
+                node.emit("input", {
+                    payload: {}
+                });
             }, node.repeat * 1000);
         }
 
@@ -201,7 +203,12 @@ module.exports = function(RED) {
             .then(() => {
                 if (weatherForecast[node.mosmixStation]) {
                     var forecastDate = new Date();
-                    forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
+                    if (msg.payload.lookAheadHours) {
+                        var lookAheadHours = Number(msg.payload.lookAheadHours) || 0;
+                        forecastDate.setTime(forecastDate.getTime() + lookAheadHours * 3600000);
+                    } else {
+                        forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
+                    }
                     try {
                         msg.payload = {
                             "station": weatherForecast[node.mosmixStation].description,
@@ -209,9 +216,11 @@ module.exports = function(RED) {
                             "humidity": getForecastedHumidity(node.mosmixStation, forecastDate),
                             "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
                             "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,
-                            "precipitation%": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
-                            "precipitationNext24h": Math.round(sumFutureValue(node.mosmixStation, "RR1c", 24, forecastDate) * 10) / 10
+                            "precipitation_perc": Math.round(getInterpolatedValue(node.mosmixStation, "wwP", forecastDate) * 10) / 10,
+                            "precipitationNext24h": Math.round(sumFutureValue(node.mosmixStation, "RR1c", 24, forecastDate) * 10) / 10,
+                            "forecast_dt": forecastDate.getTime()
                         };
+                        msg.payload["precipitation%"] = msg.payload.precipitation_perc; // for backward compatibility. Will be removed in the future
                         node.additionalFields.forEach(field => {
                             var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
                             if (val!==null) {
@@ -242,7 +251,9 @@ module.exports = function(RED) {
             // initWeatherForecast(node.mosmixStation);
         });
 
-        node.emit("input",{});
+        node.emit("input",{
+            payload: {}
+        });
     }
 
     RED.nodes.registerType("dwdweather",DwdWeatherQueryNode);
