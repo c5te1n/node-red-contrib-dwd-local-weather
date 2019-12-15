@@ -251,9 +251,6 @@ module.exports = function(RED) {
             // initWeatherForecast(node.mosmixStation);
         });
 
-        node.emit("input",{
-            payload: {}
-        });
     }
 
     RED.nodes.registerType("dwdweather",DwdWeatherQueryNode);
