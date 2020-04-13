@@ -113,6 +113,9 @@ module.exports = function(RED) {
         } else if (idx==0) {
             // all predictions in file are for the future => return first one
             return weatherForecast[mosmixStation][attribute][0];
+        } else if (Number.isNaN( weatherForecast[mosmixStation][attribute][idx-1] )) {
+            // non-continuous field, so no interpolation possible
+            return weatherForecast[mosmixStation][attribute][idx];
         } else {
             // linear interpolation of current temperature
             var share = (forecastDate.getTime() - weatherForecast[mosmixStation].times[idx-1].getTime()) / (weatherForecast[mosmixStation].times[idx].getTime() - weatherForecast[mosmixStation].times[idx-1].getTime());
