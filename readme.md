@@ -40,12 +40,19 @@ References:
 
 <a name="usage"></a>
 ## Usage
+The easiest usage of the node is using internal triggering:
+
+![basic-usage](images/basic-usage.png "Node usage")  
+**Fig. 2:** Basic node usage
+
+In this example the node cyclically reads out the DWD data and emits it as an output `msg`.
+
 
 <a name="node_configuration"></a>
 ### Node Configuration
 
 ![node-settings](images/node-settings.png "Node properties")  
-**Fig. 2:** Node properties
+**Fig. 3:** Node properties
 
 Node configuration is quite simple. Only setting the property ***MOSMIX Station*** to select the required weather forecast location is mandatory.
 
@@ -82,7 +89,7 @@ Several elements can be selected and have to be comma-separated.
 The following figure shows the `msg.payload` structure of an example with "FF,FX1,SunD,SunD1,R101,Td,VV,W1W2,wwTd":
 
 ![additional-fields](images/additional-fields.png "Additional fields")  
-**Fig. 3:** *Additional fields* example `msg.payload` contents
+**Fig. 4:** *Additional fields* example `msg.payload` contents
 
 Note that there may be values set to 'NaN' ("SunD" in the figure above) when evaluating these values.  
 See also: Node issue ["NaN error with precipitation 24h and 3h"](https://github.com/c5te1n/node-red-contrib-dwd-local-weather/issues/18).
