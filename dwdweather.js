@@ -119,7 +119,11 @@ module.exports = function(RED) {
         while (Number.isNaN(weatherForecast[mosmixStation][attribute][idx])) {
             idx += direction;
             if (idx<0 || idx>=weatherForecast[mosmixStation][attribute].length) {
-                throw new Error(RED._("dwdweather.warn.nopredictions"));
+                if (direction>0) {
+                    throw new Error(RED._("dwdweather.warn.nofuturepredictions"));
+                } else {
+                    throw new Error(RED._("dwdweather.warn.nohistoricpredictions"));
+                }
             }
         }
 
@@ -150,7 +154,7 @@ module.exports = function(RED) {
         });
         if (idx==-1) {
             // no predictions for any future dates found - likely the file is too old
-            throw new Error(RED._("dwdweather.warn.nopredictions"));
+            throw new Error(RED._("dwdweather.warn.nofuturepredictions"));
         }
         return idx;
     }

@@ -85,14 +85,23 @@ With the *Additional fields* property you can add further weather data to `msg.p
 Possible elements can be selected from this [MOSMIX element list](https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_pdf.html) from the DWD.  
 Several elements can be selected and have to be comma-separated.
 
+##### Output modifiers
+The data provided by DWD is on an hourly basis. By default, output values will be linearly interpolated. Some data fields such as "SunD" (Yesterdays total sunshine duration) in the below example are only provided once every X hours or even once per day and interpolation does not make sense. With modifiers you can change how the output value is calculated in those cases. When not specifying a modifier, the value for those fields will be 'NaN' in most cases.
+
+Output modifiers are added as a prefix to the field name. So instead of just using "SunD", you would use ">SunD" to return today's predicted total sunshine duration.
+
+Available modifiers:
+ - `<` go back in time to find the last value for this field
+ - `>` go ahead in time to find the next value for this field
+ - `°` assume the field value is a temperature and convert it from Kelvin to Celsius 
+
+See also: Node issue ["NaN error with precipitation 24h and 3h"](https://github.com/c5te1n/node-red-contrib-dwd-local-weather/issues/18).
+
 ##### Example
-The following figure shows the `msg.payload` structure of an example with "FF,FX1,SunD,SunD1,R101,Td,VV,W1W2,wwTd":
+The following figure shows the `msg.payload` structure of an example with "FF,FX1,>SunD,SunD1,R101,°Td,VV,W1W2,wwTd":
 
 ![additional-fields](images/additional-fields.png "Additional fields")  
 **Fig. 4:** *Additional fields* example `msg.payload` contents
-
-Note that there may be values set to 'NaN' ("SunD" in the figure above) when evaluating these values.  
-See also: Node issue ["NaN error with precipitation 24h and 3h"](https://github.com/c5te1n/node-red-contrib-dwd-local-weather/issues/18).
 
 ##### MOSMIX elements used by the node
 The following MOSMIX elements are used as the basis for the node's `msg.payload` values:
@@ -102,7 +111,6 @@ The following MOSMIX elements are used as the basis for the node's `msg.payload`
 - `payload.winddirection`: "DD"
 - `payload.precipitation_perc`: "wwP"
 - `payload.precipitationNext24h`: "RR1c"
-
 
 #### Name
 A name for the wheather location may be set via this property.
