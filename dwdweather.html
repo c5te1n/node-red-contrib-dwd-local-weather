@@ -51,6 +51,56 @@
 </script>
 
 <script type="text/x-red" data-help-name="dwdweather">
-    <p>A node that returns German DWD MOSMIX current / forecasted weather for a given location when an input is received.</p>
-    <p>This will either return current weather conditions or the forecast in a given number of hours. This can be passed in as a setting on the node or by setting <code>msg.lookAheadHours</code> of the message input.
+  <p>A node that returns German DWD MOSMIX current / forecasted weather for a given location when an input is received.</p>
+
+  <h3>Input</h3>
+  <dl class="message-properties">
+      <dt class="optioinal">payload.lookAheadHours
+          <span class="property-type">number</span>
+      </dt>
+      <dd> gives weather forecast in a given number of hours. </dd>
+  </dl>
+
+
+   <h3>Outputs</h3>
+     <dl class="message-properties">
+         <dt>payload <span class="property-type">string</span></dt>
+         <dd>the standard output of the node.</dd>
+     </dl>
+
+
+  <h3>Details</h3>
+
+    <p>The <b>location</b> of the forecast, an <b>internal polling</b> cycle time,
+    <b>additional weather data</b> elements are configured via the <b>node configuration</b>.</p>
+    <p>The node will either return <b>actual</b> weather conditions or the <b>forecast</b> in a given
+      number of hours (via the node configuration or the input <code>msg.payload.lookAheadHours</code>). </p>
+
+
+  <h4>Output <code>msg.payload</code> details</h4>
+    <p><code>msg.payload</code> is used as the payload of the published message.
+      It contains the following elements:</p>
+      <p>
+       <ul>
+         <li><code>payload.station</code> - Description of the station location</li>
+         <li><code>payload.tempc</code> - Temperature in °C</li>
+         <li><code>payload.humidity</code> -  Relative humidity</li>
+         <li><code>payload.windspeed</code> - Windspeed in m/s</li>
+         <li><code>payload.winddirection</code> - Winddirection in °</li>
+         <li><code>payload.precipitation_perc</code> - probability of rain in per cent (so a value of 4 means 4%)</li>
+         <li><code>payload.precipitationNext24h</code> - total precipitation in the next 24 hours in kg/m2</li>
+         <li><code>payload.forecast_dt</code> - epoch timestamp of the forecast</li>
+         <li><code>payload.precipitation%</code> - DEPRECATED, same as `payload.precipitation_perc`</li>
+       </ul>
+      </p>
+
+     <p>Additional elements in <code>msg.payload</code> can be added via
+       the node configuration property <em><b>Additional fields</b></em>.</p>
+
+
+  <h3>References</h3>
+     <ul>
+       <li>Weather location: <a href="https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_stationskatalog.cfg">MOSMIX station catalog</a> </li>
+       <li>Additional elements code: <a href="https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_pdf.html">MOSMIX elements list</a> </li>
+     </ul>
 </script>
