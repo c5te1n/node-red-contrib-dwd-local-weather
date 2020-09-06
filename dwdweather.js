@@ -93,24 +93,12 @@ module.exports = function(RED) {
         });
     }
 
-    function getInterpolatedValue(mosmixStation, attribute, forecastDate = null) {
-        if (forecastDate===null) {
-            forecastDate = new Date();
-        }
-        if (!weatherForecast[mosmixStation]) {
-            throw new Error(RED._("dwdweather.warn.noDataForStation"));
-        }
-        var idx = weatherForecast[mosmixStation]["times"].findIndex((myDate) => {
-            return (myDate > forecastDate);
-        });
-        if (!weatherForecast[mosmixStation][attribute]) {
-            // attribute has not been parsed
-            throw new Error(RED._("dwdweather.warn.noattribute", { attribute }));
-        };
-        if (idx==-1) {
-            // no predictions for any future dates found - likely the file is too old
-            throw new Error(RED._("dwdweather.warn.nopredictions"));
-        } else if (idx==0) {
+    function getInterpolatedValue(mosmixStation, attribute, forecastDate) {
+        var idx = getTimeIndex(mosmixStation, forecastDate);
+
+        assertAttributeExists(mosmixStation, attribute);
+
+        if (idx==0) {
             // all predictions in file are for the future => return first one
             return weatherForecast[mosmixStation][attribute][0];
         } else if (Number.isNaN( weatherForecast[mosmixStation][attribute][idx-1] )) {
@@ -123,32 +111,54 @@ module.exports = function(RED) {
         }
     }
 
-    function sumFutureValue(mosmixStation, attribute, hours, forecastDate = null) {
-        if (forecastDate===null) {
-            forecastDate = new Date();
+    function getValueFromShiftedIndex(mosmixStation, attribute, direction, forecastDate) {
+        var idx = getTimeIndex(mosmixStation, forecastDate);
+
+        assertAttributeExists(mosmixStation, attribute);
+
+        while (Number.isNaN(weatherForecast[mosmixStation][attribute][idx])) {
+            idx += direction;
+            if (idx<0 || idx>=weatherForecast[mosmixStation][attribute].length) {
+                throw new Error(RED._("dwdweather.warn.nopredictions"));
+            }
         }
+
+        return weatherForecast[mosmixStation][attribute][idx];
+    }
+
+    function sumFutureValue(mosmixStation, attribute, hours, forecastDate) {
+        var idx = getTimeIndex(mosmixStation, forecastDate);
+
+        assertAttributeExists(mosmixStation, attribute);
+
+        var sum = 0;
+        // sum x future values (x = hours), but not more than length of array
+        for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours + idx; i++) {
+            if (!isNaN(weatherForecast[mosmixStation][attribute][i])) {
+                sum = sum + weatherForecast[mosmixStation][attribute][i];
+            }
+        }
+        return sum;
+    }
+
+    function getTimeIndex(mosmixStation, forecastDate) {
         if (!weatherForecast[mosmixStation]) {
             throw new Error(RED._("dwdweather.warn.noDataForStation"));
         }
         var idx = weatherForecast[mosmixStation]["times"].findIndex((myDate) => {
             return (myDate > forecastDate);
         });
-        if (!weatherForecast[mosmixStation][attribute]) {
-            // attribute has not been parsed
-            throw new Error(RED._("dwdweather.warn.noattribute", { attribute }));
-        };
         if (idx==-1) {
             // no predictions for any future dates found - likely the file is too old
             throw new Error(RED._("dwdweather.warn.nopredictions"));
-        } else {
-            var sum = 0;
-            // sum x future values (x = hours), but not more than length of array
-            for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours + idx; i++) {
-                if (!isNaN(weatherForecast[mosmixStation][attribute][i])) {
-                    sum = sum + weatherForecast[mosmixStation][attribute][i];
-                }
-            }
-            return sum;
+        }
+        return idx;
+    }
+
+    function assertAttributeExists(mosmixStation, attribute) {
+        if (!weatherForecast[mosmixStation][attribute]) {
+            // attribute has not been parsed
+            throw new Error(RED._("dwdweather.warn.noattribute", { attribute }));
         }
     }
 
@@ -181,14 +191,32 @@ module.exports = function(RED) {
         node.repeat = Number(config.repeat) || 0;
         node.mosmixStation = config.mosmixStation;
         node.lookAhead = Number(config.lookAheadHours) * 3600000;
-        node.additionalFields = config.additionalFields.split(",").map(v=>v.trim()).filter(v=>(v!=""));
+        node.additionalFields = config.additionalFields.split(",").map(v => {
+            v = v.trim();
+            // split prefix (<, > or °) and fieldname
+            var field = {
+                name: "",
+                shiftDirection: 0,
+                convertToCelsius: false
+            };
+            for (var idx=0; idx<v.length && field.name==""; ++idx) {
+                var char = v.substring(idx, idx + 1);
+                switch(char) {
+                    case "<": field.shiftDirection = -1; break;
+                    case ">": field.shiftDirection = 1; break;
+                    case "°": field.convertToCelsius = true; break;
+                    default: field.name = v.substring(idx);
+                }
+            }
+            return field;
+        }).filter(v=>(v.name!=""));
         // mosmixElements = mosmixElementsBase; => removing this as it will lead to problems with multiple nodes with different additional field configs
         if (!mosmixElements[node.mosmixStation]) {
             mosmixElements[node.mosmixStation] = mosmixElementsBase;
         }
         node.additionalFields.forEach(v => {
-            if (!mosmixElements[node.mosmixStation].includes(v)) {
-                mosmixElements[node.mosmixStation].push(v);
+            if (!mosmixElements[node.mosmixStation].includes(v.name)) {
+                mosmixElements[node.mosmixStation].push(v.name);
             };
         });
 
@@ -225,9 +253,17 @@ module.exports = function(RED) {
                         };
                         msg.payload["precipitation%"] = msg.payload.precipitation_perc; // for backward compatibility. Will be removed in the future
                         node.additionalFields.forEach(field => {
-                            var val = getInterpolatedValue(node.mosmixStation, field, forecastDate);
+                            var val;
+                            if (field.shiftDirection===0) {
+                                val = getInterpolatedValue(node.mosmixStation, field.name, forecastDate);
+                            } else {
+                                val = getValueFromShiftedIndex(node.mosmixStation, field.name, field.shiftDirection, forecastDate);
+                            }
+                            if (field.convertToCelsius) {
+                                val = getTempCelsius(val);
+                            }
                             if (val!==null) {
-                                msg.payload[field] = Math.round(val * 100) / 100;
+                                msg.payload[field.name] = Math.round(val * 100) / 100;
                             };
                         });
                         node.send(msg);
