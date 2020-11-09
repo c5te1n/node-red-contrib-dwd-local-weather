@@ -43,6 +43,9 @@ References:
 The easiest usage of the node is using internal triggering:
 
 ![basic-usage](images/basic-usage.png "Node usage")  
+
+[**BasicUsageFlow.json**](examples/BasicUsageFlow.json )  
+
 **Fig. 2:** Basic node usage
 
 In this example the node cyclically reads out the DWD data and emits it as an output `msg`.
@@ -135,11 +138,17 @@ The default `msg` attributes are:
 * `payload.precipitation%` - DEPRECATED, same as `payload.precipitation_perc`
 
 ## Examples
+***
+**Remark**: Example flows are present in the examples subdirectory. In Node-RED they can be imported via the import function and then selecting *Examples* in the vertical tab menue.
+***
 
 ### Basic example
 This example shows how to trigger the node and how to evaluate the `msg.payload.tempc` element.
 
 ![basic-example](images/basic-example.png "Basic example")  
+
+[**BasicExampleFlow.json**](examples/BasicExampleFlow.json)  
+
 **Fig. 5:** Basic example flow
 
 <details>
@@ -157,6 +166,9 @@ This example shows how to trigger the node and how to evaluate the `msg.payload.
 The configuration of the property *Additional fields* was set to "FX1,SunD1,VV". Therefore the elements `msg.payload.FX1` (max. wind gust in the lasts hour), `msg.payload.SunD1` (sunshine duration in the last hour) and `msg.payload.VV` (visibility) appear additionally at the output.  
 
 ![additionalfields-example](images/additionalfields-example.png "Additional fields example")  
+
+[**AdditionalFieldsExampleFlow.json**](examples/AdditionalFieldsExampleFlow.json)  
+
 **Fig. 6:** Example with *Additional fields* flow
 
 <details>
