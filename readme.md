@@ -43,7 +43,6 @@ References:
 The easiest usage of the node is using internal triggering:
 
 ![basic-usage](images/basic-usage.png "Node usage")  
-
 [**BasicUsageFlow.json**](examples/BasicUsageFlow.json )  
 
 **Fig. 2:** Basic node usage
@@ -146,7 +145,6 @@ The default `msg` attributes are:
 This example shows how to trigger the node and how to evaluate the `msg.payload.tempc` element.
 
 ![basic-example](images/basic-example.png "Basic example")  
-
 [**BasicExampleFlow.json**](examples/BasicExampleFlow.json)  
 
 **Fig. 5:** Basic example flow
@@ -168,7 +166,6 @@ The configuration of the property *Additional fields* was set to "FX1,SunD1,VV".
 ![additionalfields-example](images/additionalfields-example.png "Additional fields example")  
 
 [**AdditionalFieldsExampleFlow.json**](examples/AdditionalFieldsExampleFlow.json)  
-
 **Fig. 6:** Example with *Additional fields* flow
 
 <details>
