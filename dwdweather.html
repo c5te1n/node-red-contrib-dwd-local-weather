@@ -8,6 +8,7 @@
             lookAheadHours: { "value": "0", "required": true, "validate": RED.validators.number() },
             additionalFields: { "value": "" },
             repeat: { "value": "0", "validate":function(v) { return (v>=0); } },
+            topic: { "value": "" },
         },
         inputs:1,
         outputs:1,
@@ -47,6 +48,10 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+     <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.topic"></span></label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 </script>
 
