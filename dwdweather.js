@@ -245,6 +245,7 @@ module.exports = function(RED) {
                         forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
                     }
                     try {
+                        msg.topic = config.topic;
                         msg.payload = {
                             "station": weatherForecast[node.mosmixStation].description,
                             "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),
