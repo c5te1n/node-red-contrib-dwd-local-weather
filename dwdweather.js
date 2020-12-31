@@ -5,7 +5,7 @@ module.exports = function(RED) {
         sax = require("sax");
 
     const MOSMIX_URL = 'https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{$station}/kml/MOSMIX_L_LATEST_{$station}.kmz';
-    const MOSMIX_MAXAGE = 3600 * 1000;
+    const MOSMIX_MAXAGE = 3590 * 1000; // use slightly less than an hour to make sure to request a new file if a flow triggers every 60 minutes
 
     var weatherForecast = {}; // main data structure to hold weather forecast. See initWeatherForecast()
     initWeatherForecast();
