@@ -43,6 +43,8 @@ References:
 The easiest usage of the node is using internal triggering:
 
 ![basic-usage](images/basic-usage.png "Node usage")  
+[**BasicUsageFlow.json**](examples/BasicUsageFlow.json )  
+
 **Fig. 2:** Basic node usage
 
 In this example the node cyclically reads out the DWD data and emits it as an output `msg`.
@@ -93,7 +95,7 @@ Output modifiers are added as a prefix to the field name. So instead of just usi
 Available modifiers:
  - `<` go back in time to find the last value for this field
  - `>` go ahead in time to find the next value for this field
- - `°` assume the field value is a temperature and convert it from Kelvin to Celsius 
+ - `°` assume the field value is a temperature and convert it from Kelvin to Celsius
 
 See also: Node issue ["NaN error with precipitation 24h and 3h"](https://github.com/c5te1n/node-red-contrib-dwd-local-weather/issues/18).
 
@@ -135,11 +137,16 @@ The default `msg` attributes are:
 * `payload.precipitation%` - DEPRECATED, same as `payload.precipitation_perc`
 
 ## Examples
+***
+**Remark**: Example flows are present in the examples subdirectory. In Node-RED they can be imported via the import function and then selecting *Examples* in the vertical tab menue.
+***
 
 ### Basic example
 This example shows how to trigger the node and how to evaluate the `msg.payload.tempc` element.
 
 ![basic-example](images/basic-example.png "Basic example")  
+[**BasicExampleFlow.json**](examples/BasicExampleFlow.json)  
+
 **Fig. 5:** Basic example flow
 
 <details>
@@ -157,6 +164,8 @@ This example shows how to trigger the node and how to evaluate the `msg.payload.
 The configuration of the property *Additional fields* was set to "FX1,SunD1,VV". Therefore the elements `msg.payload.FX1` (max. wind gust in the lasts hour), `msg.payload.SunD1` (sunshine duration in the last hour) and `msg.payload.VV` (visibility) appear additionally at the output.  
 
 ![additionalfields-example](images/additionalfields-example.png "Additional fields example")  
+
+[**AdditionalFieldsExampleFlow.json**](examples/AdditionalFieldsExampleFlow.json)  
 **Fig. 6:** Example with *Additional fields* flow
 
 <details>
@@ -166,6 +175,7 @@ The configuration of the property *Additional fields* was set to "FX1,SunD1,VV".
 [{"id":"6b9dad75.8e1cfc","type":"dwdweather","z":"c1f84551.fa0b5","name":"Berlin, Alex","mosmixStation":"10389","lookAheadHours":"0","additionalFields":"FX1,SunD1,VV","repeat":"0","x":390,"y":1680,"wires":[["98ed4e40.07d5","e5ef0089.cf48","69ba80bb.54cfc","36980239.12325e","b21cfb33.0eb55","47c88c29.1cea44","5a984276.9804c4"]]},{"id":"9e5e1177.58e82","type":"inject","z":"c1f84551.fa0b5","name":"","props":[{"p":"payload"}],"repeat":"","crontab":"","once":false,"onceDelay":0.1,"topic":"","payload":"","payloadType":"str","x":190,"y":1680,"wires":[["6b9dad75.8e1cfc"]]},{"id":"98ed4e40.07d5","type":"debug","z":"c1f84551.fa0b5","name":"windspeed in m/s","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.windspeed","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":730,"y":1800,"wires":[]},{"id":"e5ef0089.cf48","type":"debug","z":"c1f84551.fa0b5","name":"wind direction in °","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.winddirection","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":740,"y":1860,"wires":[]},{"id":"69ba80bb.54cfc","type":"debug","z":"c1f84551.fa0b5","name":"max. wind gust last hour","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.FX1","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":760,"y":1920,"wires":[]},{"id":"47c88c29.1cea44","type":"debug","z":"c1f84551.fa0b5","name":"sunshine duration last hour in seconds","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.SunD1","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":810,"y":1980,"wires":[]},{"id":"b21cfb33.0eb55","type":"debug","z":"c1f84551.fa0b5","name":"rel. humidity in %","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.humidity","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":730,"y":1740,"wires":[]},{"id":"36980239.12325e","type":"debug","z":"c1f84551.fa0b5","name":"temperature in °C","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.tempc","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":740,"y":1680,"wires":[]},{"id":"5a984276.9804c4","type":"debug","z":"c1f84551.fa0b5","name":"visibility in m","active":true,"tosidebar":false,"console":false,"tostatus":true,"complete":"payload.VV","targetType":"msg","statusVal":"payload.windspeed","statusType":"auto","x":720,"y":2040,"wires":[]}]
 ```
 </details>
+
 <br>
 
 Note that often the values have to be scaled to have more 'handy' values.
