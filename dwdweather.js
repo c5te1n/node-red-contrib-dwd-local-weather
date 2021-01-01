@@ -1,11 +1,11 @@
 module.exports = function(RED) {
     "use strict";
-    const request = require("request"),
+    const axios = require("axios"),
         unzipper = require("unzipper"),
         sax = require("sax");
 
     const MOSMIX_URL = 'https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{$station}/kml/MOSMIX_L_LATEST_{$station}.kmz';
-    const MOSMIX_MAXAGE = 3600 * 1000;
+    const MOSMIX_MAXAGE = 3590 * 1000; // use slightly less than an hour to make sure to request a new file if a flow triggers every 60 minutes
 
     var weatherForecast = {}; // main data structure to hold weather forecast. See initWeatherForecast()
     initWeatherForecast();
@@ -75,21 +75,23 @@ module.exports = function(RED) {
 
         return new Promise((resolve, reject) => {
             //console.log(MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation));
-            request.get(MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation))
-                .on('error', reject)
-                .on('response', (response) => {
-                    if (response.statusCode == 404) {
-                        reject(RED._("dwdweather.warn.noDataForStation"));
-                    } else if (response.statusCode != 200) {
-                        reject(response.statusCode + " " + response.statusMessage);
-                    }
-                })
-                .pipe(unzipper.ParseOne(/\.kml/i))
+            axios({
+                method: "get",
+                url: MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation),
+                responseType: "stream"
+            }).then( (response) => {
+                response.data.pipe(unzipper.ParseOne(/\.kml/i))
                 .on('error', reject)
                 .pipe(xmlStreamParser)
                 .on('error', reject)
                 .on('end', resolve);
-            // end stream
+            }).catch( (error) => {
+                if (error.response && error.response.status == 404) {
+                    reject(RED._("dwdweather.warn.noDataForStation"));
+                } else {
+                    reject(response.status + " " + response.statusText);
+                };
+            });
         });
     }
 
@@ -245,6 +247,7 @@ module.exports = function(RED) {
                         forecastDate.setTime(forecastDate.getTime() + node.lookAhead);
                     }
                     try {
+                        msg.topic = config.topic;
                         msg.payload = {
                             "station": weatherForecast[node.mosmixStation].description,
                             "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),

@@ -117,6 +117,9 @@ The following MOSMIX elements are used as the basis for the node's `msg.payload`
 #### Name
 A name for the wheather location may be set via this property.
 
+#### Topic
+Allows to configure the topic for emitted messages.
+
 ### Input
 The node is triggered by any input `msg` with arbitrary contents.
 

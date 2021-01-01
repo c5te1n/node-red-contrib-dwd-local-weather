@@ -8,6 +8,7 @@
             lookAheadHours: { "value": "0", "required": true, "validate": RED.validators.number() },
             additionalFields: { "value": "" },
             repeat: { "value": "0", "validate":function(v) { return (v>=0); } },
+            topic: { "value": "" },
         },
         inputs:1,
         outputs:1,
@@ -20,25 +21,25 @@
 
 <script type="text/x-red" data-template-name="dwdweather">
     <div class="form-row">
-        <label for="node-input-mosmixStation"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.mosmixStation"></span></label>
+        <label for="node-input-mosmixStation"><i class="icon-map-marked"></i> <span data-i18n="dwdweather.label.mosmixStation"></span></label>
         <input type="text" id="node-input-mosmixStation" placeholder="mosmixStation">
     </div>
     <div class="form-row" style="padding-left: 10px">
         <span data-i18n="dwdweather.description.mosmixStation"></span><a href="https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_stationskatalog.cfg" target="_blank"><span data-i18n="dwdweather.description.mosmixStationLinkText"></span></a>
     </div>
     <div class="form-row">
-        <label for="node-input-lookAheadHours"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.lookAheadHours"></span></label>
+        <label for="node-input-lookAheadHours"><i class="icon-arrow-right"></i> <span data-i18n="dwdweather.label.lookAheadHours"></span></label>
         <input type="text" id="node-input-lookAheadHours" placeholder="lookAheadHours">
     </div>
     <div class="form-row" style="padding-left: 10px">
         <span data-i18n="dwdweather.description.lookAheadHours"></span>
     </div>
     <div class="form-row">
-        <label for="node-input-repeat"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.repeat"></span></label>
+        <label for="node-input-repeat"><i class="icon-repeat"></i> <span data-i18n="dwdweather.label.repeat"></span></label>
         <input type="text" id="node-input-repeat" placeholder="Repeat">
     </div>
     <div class="form-row">
-        <label for="node-input-additionalFields"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.additionalFields"></span></label>
+        <label for="node-input-additionalFields"><i class="icon-bars"></i> <span data-i18n="dwdweather.label.additionalFields"></span></label>
         <input type="text" id="node-input-additionalFields" placeholder="additionalFields">
     </div>
     <div class="form-row" style="padding-left: 10px">
@@ -47,6 +48,10 @@
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.name"></span></label>
         <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+     <div class="form-row">
+        <label for="node-input-topic"><i class="icon-tasks"></i> <span data-i18n="dwdweather.label.topic"></span></label>
+        <input type="text" id="node-input-topic" placeholder="Topic">
     </div>
 </script>
 
