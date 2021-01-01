@@ -139,6 +139,13 @@ The default `msg` attributes are:
 * `payload.forecast_dt` - epoch timestamp of the forecast
 * `payload.precipitation%` - DEPRECATED, same as `payload.precipitation_perc`
 
+In case of a value set to the node configuration property *Topic* the output `msg` contains an additional attribute `msg.topic` with the set content in addition to the `msg.payload` object.  
+As an example, if the node configuration property *Topic* is set to "myTopic" the output `msg` looks like this:
+
+![output-topic-example](images/output-topic-example.png "Output topic example")  
+
+**Fig. 5:** Example output `msg` with topic configuration property set to "myTopic"
+
 ## Examples
 ***
 **Remark**: Example flows are present in the examples subdirectory. In Node-RED they can be imported via the import function and then selecting *Examples* in the vertical tab menue.
@@ -150,7 +157,7 @@ This example shows how to trigger the node and how to evaluate the `msg.payload.
 ![basic-example](images/basic-example.png "Basic example")  
 [**BasicExampleFlow.json**](examples/BasicExampleFlow.json)  
 
-**Fig. 5:** Basic example flow
+**Fig. 6:** Basic example flow
 
 <details>
   <summary>Click to expand code snippet of the flow</summary>
@@ -169,7 +176,7 @@ The configuration of the property *Additional fields* was set to "FX1,SunD1,VV".
 ![additionalfields-example](images/additionalfields-example.png "Additional fields example")  
 
 [**AdditionalFieldsExampleFlow.json**](examples/AdditionalFieldsExampleFlow.json)  
-**Fig. 6:** Example with *Additional fields* flow
+**Fig. 7:** Example with *Additional fields* flow
 
 <details>
   <summary>Click to expand code snippet of the flow</summary>
