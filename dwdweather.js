@@ -1,6 +1,6 @@
 module.exports = function(RED) {
     "use strict";
-    const request = require("request"),
+    const axios = require("axios"),
         unzipper = require("unzipper"),
         sax = require("sax");
 
@@ -75,21 +75,23 @@ module.exports = function(RED) {
 
         return new Promise((resolve, reject) => {
             //console.log(MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation));
-            request.get(MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation))
-                .on('error', reject)
-                .on('response', (response) => {
-                    if (response.statusCode == 404) {
-                        reject(RED._("dwdweather.warn.noDataForStation"));
-                    } else if (response.statusCode != 200) {
-                        reject(response.statusCode + " " + response.statusMessage);
-                    }
-                })
-                .pipe(unzipper.ParseOne(/\.kml/i))
+            axios({
+                method: "get",
+                url: MOSMIX_URL.replace(/\{\$station\}/g, node.mosmixStation),
+                responseType: "stream"
+            }).then( (response) => {
+                response.data.pipe(unzipper.ParseOne(/\.kml/i))
                 .on('error', reject)
                 .pipe(xmlStreamParser)
                 .on('error', reject)
                 .on('end', resolve);
-            // end stream
+            }).catch( (error) => {
+                if (error.response && error.response.status == 404) {
+                    reject(RED._("dwdweather.warn.noDataForStation"));
+                } else {
+                    reject(response.status + " " + response.statusText);
+                };
+            });
         });
     }
 

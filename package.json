@@ -23,9 +23,9 @@
     "url": "https://github.com/c5te1n/node-red-contrib-dwd-local-weather.git"
   },
   "dependencies": {
-    "request": "~2.88.2",
+    "axios": "~0.21.1",
     "sax": "~1.2.4",
-    "unzipper": "~0.10.10"
+    "unzipper": "~0.10.11"
   },
   "node-red": {
     "nodes": {

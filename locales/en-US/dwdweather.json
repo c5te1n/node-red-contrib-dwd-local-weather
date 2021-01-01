@@ -9,7 +9,7 @@
 			"topic": "Topic"
 		},
 		"description": {
-			"mosmixStation": "MOSMIX Station number. See \"id\" in: ",
+			"mosmixStation": "MOSMIX Station number. See \"id\" in ",
 			"mosmixStationLinkText": "here",
 			"lookAheadHours": "Hours to look ahead into the future. Use 0 to get current weather.",
 			"additionalFields": "Comma separated list of additional element short names to parse and return from MOSMIX (case sensitive, i. e. \"DRR1\"). See: ",
