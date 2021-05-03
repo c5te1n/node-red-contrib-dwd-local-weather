@@ -7,6 +7,7 @@
             mosmixStation: { "value": null, "required": true, "validate": RED.validators.regex(/[A-Z0-9]{3,5}/) },
             lookAheadHours: { "value": "0", "required": true, "validate": RED.validators.number() },
             additionalFields: { "value": "" },
+            omitMessageOnStart: { "value": true },
             repeat: { "value": "0", "validate":function(v) { return (v>=0); } },
             topic: { "value": "" },
         },
@@ -33,6 +34,10 @@
     </div>
     <div class="form-row" style="padding-left: 10px">
         <span data-i18n="dwdweather.description.lookAheadHours"></span>
+    </div>
+    <div class="form-row">
+        <label for="node-input-omitMessageOnStart"><i class="fa fa-crosshairs"></i> <span data-i18n="dwdweather.label.omitMessageOnStart"></span></label>
+        <input type="checkbox" id="node-input-omitMessageOnStart" placeholder="omitMessageOnStart">
     </div>
     <div class="form-row">
         <label for="node-input-repeat"><i class="icon-repeat"></i> <span data-i18n="dwdweather.label.repeat"></span></label>
