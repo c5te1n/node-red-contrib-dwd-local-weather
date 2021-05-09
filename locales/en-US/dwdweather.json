@@ -2,6 +2,7 @@
 	"dwdweather": {
 		"label": {
 			"name": "Name",
+			"omitMessageOnStart": "Omit message on start",
 			"repeat": "Repeat",
 			"mosmixStation": "MOSMIX Station",
 			"lookAheadHours": "Look ahead hours",
