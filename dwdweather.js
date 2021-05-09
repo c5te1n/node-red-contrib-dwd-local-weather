@@ -297,9 +297,11 @@ module.exports = function(RED) {
             // initWeatherForecast(node.mosmixStation);
         });
 
-        node.emit("input",{
-            payload: {}
-        });
+        if (!config.omitMessageOnStart) {
+            node.emit("input", {
+                payload: {}
+            });
+        }
     }
 
     RED.nodes.registerType("dwdweather",DwdWeatherQueryNode);

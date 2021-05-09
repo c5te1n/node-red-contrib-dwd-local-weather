@@ -7,6 +7,7 @@
             mosmixStation: { "value": null, "required": true, "validate": RED.validators.regex(/[A-Z0-9]{3,5}/) },
             lookAheadHours: { "value": "0", "required": true, "validate": RED.validators.number() },
             additionalFields: { "value": "" },
+            omitMessageOnStart: { "value": true },
             repeat: { "value": "0", "validate":function(v) { return (v>=0); } },
             topic: { "value": "" },
         },
@@ -35,6 +36,10 @@
         <span data-i18n="dwdweather.description.lookAheadHours"></span>
     </div>
     <div class="form-row">
+        <label for="node-input-omitMessageOnStart"><i class="fa fa-crosshairs"></i> <span data-i18n="dwdweather.label.omitMessageOnStart"></span></label>
+        <input type="checkbox" id="node-input-omitMessageOnStart" placeholder="omitMessageOnStart">
+    </div>
+    <div class="form-row">
         <label for="node-input-repeat"><i class="icon-repeat"></i> <span data-i18n="dwdweather.label.repeat"></span></label>
         <input type="text" id="node-input-repeat" placeholder="Repeat">
     </div>
@@ -43,7 +48,7 @@
         <input type="text" id="node-input-additionalFields" placeholder="additionalFields">
     </div>
     <div class="form-row" style="padding-left: 10px">
-        <span data-i18n="dwdweather.description.additionalFields"></span><a href="https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_parameteruebersicht.pdf" target="_blank"><span data-i18n="dwdweather.description.additionalFieldsLinkText"></span></a>
+        <span data-i18n="dwdweather.description.additionalFields"></span><a href="https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_xls.html" target="_blank"><span data-i18n="dwdweather.description.additionalFieldsLinkText"></span></a>
     </div>
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> <span data-i18n="dwdweather.label.name"></span></label>
@@ -106,6 +111,6 @@
   <h3>References</h3>
      <ul>
        <li>Weather location: <a href="https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_stationskatalog.cfg">MOSMIX station catalog</a> </li>
-       <li>Additional elements code: <a href="https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_pdf.html">MOSMIX elements list</a> </li>
+       <li>Additional elements code: <a href="https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_xls.html">MOSMIX elements list</a> </li>
      </ul>
 </script>

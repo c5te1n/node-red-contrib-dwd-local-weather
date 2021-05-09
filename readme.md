@@ -76,8 +76,13 @@ When you set *Look ahead hours*, the weather data returned will be for x hours i
 Note: This configuration property is superseeded by an input `msg` with a  `msg.payload.lookAheadHours` element (see secion *Input* below).
 
 
+
+#### Omit message on start
+For compatibility with the openweathermap node, this node emits a message with current weather data immediately once the flow is deployed. If this is not desirable, it can be deactivated here. In any case, the node will emit a message after the repeat cycle in case this is set (see below) or once it is triggered by receiving a message.
+
+
 #### Repeat
-Automatic cyclic repeat (in seconds). If set to a value <> 0, the node automatically repeats the DWD data query and emits a `msg` telegram at its output.
+Automatic cyclic repeat (in seconds). If set to a value > 0, the node automatically repeats the DWD data query and emits a `msg` telegram at its output.
 
 Hint: Do not set this value too small to avoid unneccesary traffic. Appropriate repeat intervals are several minutes due to the weather data does not change at a higher rate than 15-20 seconds, typically one minute.
 
