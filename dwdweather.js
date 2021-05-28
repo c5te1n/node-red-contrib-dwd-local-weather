@@ -147,6 +147,52 @@ module.exports = function(RED) {
         return sum;
     }
 
+    function maxFutureValue(mosmixStation, attribute, hours, forecastDate) {
+        var idx = getTimeIndex(mosmixStation, forecastDate);
+
+        assertAttributeExists(mosmixStation, attribute);
+
+        var max = NaN;
+        // find max value in x future values (x = hours), but not more than length of array
+        for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours + idx; i++) {
+            var currentValue = weatherForecast[mosmixStation][attribute][i];
+
+            if (!isNaN(currentValue)) {
+                if (isNaN(max)) {
+                    max = currentValue;
+                } else {
+                    if (currentValue > max) {
+                        max = currentValue;
+                    }
+                }
+            }
+        }
+        return max;
+    }
+
+    function minFutureValue(mosmixStation, attribute, hours, forecastDate) {
+        var idx = getTimeIndex(mosmixStation, forecastDate);
+
+        assertAttributeExists(mosmixStation, attribute);
+
+        var min = NaN;
+        // find min value in x future values (x = hours), but not more than length of array
+        for (var i = idx; i < weatherForecast[mosmixStation][attribute].length && i < hours + idx; i++) {
+            var currentValue = weatherForecast[mosmixStation][attribute][i];
+
+            if (!isNaN(currentValue)) {
+                if (isNaN(min)) {
+                    min = currentValue;
+                } else {
+                    if (currentValue < min) {
+                        min = currentValue;
+                    }
+                }
+            }
+        }
+        return min;
+    }
+
     function getTimeIndex(mosmixStation, forecastDate) {
         if (!weatherForecast[mosmixStation]) {
             throw new Error(RED._("dwdweather.warn.noDataForStation"));
@@ -251,6 +297,8 @@ module.exports = function(RED) {
                         msg.payload = {
                             "station": weatherForecast[node.mosmixStation].description,
                             "tempc": getForecastedTemperature(node.mosmixStation, forecastDate),
+                            "tempc_min_next24h": Math.round(getTempCelsius(minFutureValue(node.mosmixStation, "TTT", 24, forecastDate)) * 10) / 10,
+                            "tempc_max_next24h": Math.round(getTempCelsius(maxFutureValue(node.mosmixStation, "TTT", 24, forecastDate)) * 10) / 10,
                             "humidity": getForecastedHumidity(node.mosmixStation, forecastDate),
                             "windspeed": Math.round(getInterpolatedValue(node.mosmixStation, "FF", forecastDate) * 10) / 10,
                             "winddirection": Math.round(getInterpolatedValue(node.mosmixStation, "DD", forecastDate) * 10) / 10,

@@ -4,6 +4,8 @@ A node red node that returns German DWD MOSMIX current / forecasted weather for 
 
 It gives you the following data:
 - Temperature in °C (in a 2 m height)
+- Minimal temperature in °C (in a 2 m height) in the next 24 hours
+- Maximum temperature in °C (in a 2 m height) in the next 24 hours
 - Relative humidity in %
 - Windspeed in m/s (in a 10 m height)
 - Wind direction in degrees
@@ -113,6 +115,8 @@ The following figure shows the `msg.payload` structure of an example with "FF,FX
 ##### MOSMIX elements used by the node
 The following MOSMIX elements are used as the basis for the node's `msg.payload` values:
 - `payload.tempc`:  "TTT"
+- `payload.tempc_min_next24h`:  "TTT"
+- `payload.tempc_max_next24h`:  "TTT"
 - `payload.humidity`: "Td" and "TTT"
 - `payload.windspeed`: "FF"
 - `payload.winddirection`: "DD"
@@ -136,6 +140,8 @@ The node emits a `msg` whenever it is triggered by an input `msg` or at the conf
 The default `msg` attributes are:
 * `payload.station` - Description (location) of the station
 * `payload.tempc` - Temperature in °C
+* `payload.tempc_min_next24h` - Minimal temperature in °C in next 24 hours
+* `payload.tempc_max_next24h` - Maximun temperature in °C in next 24 hours
 * `payload.humidity` -  Relative humidity
 * `payload.windspeed` - Windspeed in m/s
 * `payload.winddirection` - Winddirection in °
