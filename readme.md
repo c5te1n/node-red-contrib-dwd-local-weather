@@ -89,7 +89,7 @@ Hint: Do not set this value too small to avoid unneccesary traffic. Appropriate 
 #### Additional fields
 ##### Basics
 With the *Additional fields* property you can add further weather data to `msg.payload`.    
-Possible elements can be selected from this [MOSMIX element list](https://www.dwd.de/DE/leistungen/opendata/help/schluessel_datenformate/kml/mosmix_elemente_xls.html) from the DWD.  
+Possible elements can be selected from this [MOSMIX element list]( https://www.dwd.de/DE/leistungen/met_verfahren_mosmix/mosmix_parameteruebersicht.html) from the DWD.  
 Several elements can be selected and have to be comma-separated.
 
 ##### Output modifiers
