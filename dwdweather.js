@@ -89,7 +89,9 @@ module.exports = function(RED) {
                 if (error.response && error.response.status == 404) {
                     reject(RED._("dwdweather.warn.noDataForStation"));
                 } else {
-                    reject(response.status + " " + response.statusText);
+                    let message = error.response ? error.response.status + " " + error.response.statusText : 'Response is null';
+                    reject(message);
+                    //reject(response.status + " " + response.statusText);
                 };
             });
         });
