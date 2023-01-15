@@ -238,6 +238,7 @@ module.exports = function(RED) {
         }
 
         node.on('input', function(msg) {
+            msg.payload ??= {};
             updateWeatherForecastIfOutdated(node)
             .then(() => {
                 if (weatherForecast[node.mosmixStation]) {
